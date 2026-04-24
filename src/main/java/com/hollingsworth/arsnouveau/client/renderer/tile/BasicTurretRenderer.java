@@ -29,9 +29,9 @@ public class BasicTurretRenderer extends ArsGeoBlockRenderer<BasicSpellTurretTil
         PoseStack poseStack = renderPassInfo.poseStack();
         Direction direction = renderPassInfo.renderState().blockState.getValue(BasicSpellTurret.FACING);
         if (direction == Direction.UP) {
-            poseStack.translate(0, 0.5, -0.5);
+            poseStack.translate(0, -0.5, -0.5);
         } else if (direction == Direction.DOWN) {
-            poseStack.translate(0, 0.5, 0.5);
+            poseStack.translate(0, -0.5, 0.5);
         }
     }
 

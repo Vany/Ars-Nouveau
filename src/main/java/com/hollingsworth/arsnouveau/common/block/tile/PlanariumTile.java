@@ -33,6 +33,8 @@ import net.minecraft.util.Tuple;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.portal.TeleportTransition;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -90,7 +92,9 @@ public class PlanariumTile extends ModdedTile implements ITickable, Nameable {
             if (!playersNearby) {
                 return;
             }
-            DimManager.Entry entry1 = dimManager.getOrCreateTemplate(serverLevel, worldPosition, key);
+            // Ensure the dimension level exists (may be absent after server restart)
+            Tuple<ServerLevel, DimManager.Entry> levelAndEntry = dimManager.getOrCreateLevel(serverLevel, key, worldPosition);
+            DimManager.Entry entry1 = levelAndEntry.getB();
             if (entry1 != null) {
                 // Eagerly sends a packet any time this dimension gets marked dirty.
                 // Consider adding a backoff period for batching template changes
@@ -234,7 +238,8 @@ public class PlanariumTile extends ModdedTile implements ITickable, Nameable {
                 jarData.setEnteredFrom(entity.getUUID(), GlobalPos.of(level.dimension(), entity.blockPosition()), entity.getRotationVector());
             }
             BlockPos spawnPos = jarData.getSpawnPos();
-            entity.teleportTo(dimLevel, spawnPos.getX() + 0.5, spawnPos.getY() + 1, spawnPos.getZ() + 0.5, Set.of(), entity.getYRot(), entity.getXRot(), false);
+            Vec3 dest = new Vec3(spawnPos.getX() + 0.5, spawnPos.getY() + 1, spawnPos.getZ() + 0.5);
+            entity.teleport(new TeleportTransition(dimLevel, dest, Vec3.ZERO, entity.getYRot(), entity.getXRot(), TeleportTransition.DO_NOTHING));
         }
     }
 

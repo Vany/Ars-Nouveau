@@ -15,9 +15,11 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.model.object.armorstand.ArmorStandArmorModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.Direction;
@@ -72,24 +74,21 @@ public class AlterationTableRenderer extends GeoBlockRenderer<AlterationTile, Ar
 
     @Override
     public void adjustRenderPose(RenderPassInfo<ArsBlockEntityRenderState> renderPassInfo) {
-        super.adjustRenderPose(renderPassInfo);
+        // Do NOT call super — tryRotateByBlockstate would double-rotate with our custom code below
         BlockState state = renderPassInfo.renderState().blockState;
         if (state.getValue(AlterationTable.PART) != ThreePartBlock.HEAD) return;
         Direction direction = state.getValue(AlterationTable.FACING);
         PoseStack stack = renderPassInfo.poseStack();
-        if (direction == Direction.NORTH) {
-            stack.mulPose(Axis.YP.rotationDegrees(-90));
-            stack.translate(1, 0, 0);
-        } else if (direction == Direction.SOUTH) {
-            stack.mulPose(Axis.YP.rotationDegrees(270));
-            stack.translate(-1, 0, 0);
-        } else if (direction == Direction.WEST) {
-            stack.mulPose(Axis.YP.rotationDegrees(270));
-            stack.translate(0, 0, -1);
-        } else if (direction == Direction.EAST) {
-            stack.mulPose(Axis.YP.rotationDegrees(-90));
-            stack.translate(0, 0, 1);
-        }
+        ArsGeoBlockRenderer.applyFacingPose(stack, direction);
+    }
+
+    // Skip non-HEAD parts: AlterationTable is a 3-part block (FOOT+HEAD+OTHER), each with its own tile entity.
+    // Without this guard the full model renders once per part = rendered 3 times.
+    @Override
+    public void submit(ArsBlockEntityRenderState renderState, PoseStack poseStack,
+                       SubmitNodeCollector collector, CameraRenderState cameraState) {
+        if (renderState.blockState.getValue(AlterationTable.PART) != ThreePartBlock.HEAD) return;
+        super.submit(renderState, poseStack, collector, cameraState);
     }
 
     @Override
