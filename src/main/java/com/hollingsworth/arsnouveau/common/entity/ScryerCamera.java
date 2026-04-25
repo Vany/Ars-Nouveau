@@ -111,6 +111,7 @@ public class ScryerCamera extends Entity {
 
     }
 
+    @Override
     public void tick() {
         if (this.level.isClientSide()) {
             if (this.screenshotSoundCooldown > 0) {

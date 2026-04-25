@@ -1,9 +1,0 @@
-{
-  "model": {
-    "type": "minecraft:special",
-    "base": "ars_nouveau:item/inscription_table",
-    "model": {
-      "type": "geckolib:geckolib"
-    }
-  }
-}

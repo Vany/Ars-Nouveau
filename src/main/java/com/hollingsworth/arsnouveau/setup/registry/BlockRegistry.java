@@ -23,8 +23,15 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
+import com.hollingsworth.arsnouveau.common.items.data.BlockFillContents;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Consumer;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -110,7 +117,17 @@ public class BlockRegistry {
 
     public static BlockEntityTypeRegistryWrapper<EnchantingApparatusTile> ENCHANTING_APP_TILE = registerTile(LibBlockNames.ENCHANTING_APPARATUS, EnchantingApparatusTile::new, ENCHANTING_APP_BLOCK);
 
-    public static BlockRegistryWrapper<SourceJar> SOURCE_JAR = registerBlockAndItem(LibBlockNames.SOURCE_JAR, SourceJar::new);
+    public static BlockRegistryWrapper<SourceJar> SOURCE_JAR = registerBlockAndItem(LibBlockNames.SOURCE_JAR, SourceJar::new,
+        (reg) -> new ModBlockItem(reg.get(), defaultItemProperties()) {
+            @Override
+            public void appendHoverText(@NotNull ItemStack stack, @NotNull Item.TooltipContext context,
+                                        @NotNull TooltipDisplay display, @NotNull Consumer<Component> tooltip2,
+                                        @NotNull TooltipFlag flagIn) {
+                super.appendHoverText(stack, context, display, tooltip2, flagIn);
+                int source = BlockFillContents.get(stack);
+                tooltip2.accept(Component.translatable("ars_nouveau.source_jar.fullness", (source * 100) / 10000));
+            }
+        });
     public static BlockEntityTypeRegistryWrapper<SourceJarTile> SOURCE_JAR_TILE = registerTile(LibBlockNames.SOURCE_JAR, SourceJarTile::new, SOURCE_JAR);
 
     public static BlockRegistryWrapper<Relay> RELAY = registerBlockAndItem(LibBlockNames.RELAY, Relay::new, (reg) -> new RendererBlockItem(reg, defaultItemProperties()) {
@@ -175,7 +192,16 @@ public class BlockRegistry {
     public static BlockRegistryWrapper<SourceBerryBush> SOURCEBERRY_BUSH = registerBlockAndItem(LibBlockNames.SOURCEBERRY_BUSH, () -> new SourceBerryBush(newBlockProperties().randomTicks().noCollision().sound(SoundType.SWEET_BERRY_BUSH)), (reg) -> new BlockItem(reg.get(), defaultItemProperties().food(ItemsRegistry.SOURCE_BERRY_FOOD)));
     public static BlockRegistryWrapper<WixieCauldron> WIXIE_CAULDRON = registerBlockAndItem(LibBlockNames.WIXIE_CAULDRON, WixieCauldron::new);
     public static BlockEntityTypeRegistryWrapper<WixieCauldronTile> WIXIE_CAULDRON_TYPE = registerTile(LibBlockNames.WIXIE_CAULDRON, WixieCauldronTile::new, WIXIE_CAULDRON);
-    public static BlockRegistryWrapper<CreativeSourceJar> CREATIVE_SOURCE_JAR = registerBlockAndItem(LibBlockNames.CREATIVE_SOURCE_JAR, CreativeSourceJar::new);
+    public static BlockRegistryWrapper<CreativeSourceJar> CREATIVE_SOURCE_JAR = registerBlockAndItem(LibBlockNames.CREATIVE_SOURCE_JAR, CreativeSourceJar::new,
+        (reg) -> new ModBlockItem(reg.get(), defaultItemProperties()) {
+            @Override
+            public void appendHoverText(@NotNull ItemStack stack, @NotNull Item.TooltipContext context,
+                                        @NotNull TooltipDisplay display, @NotNull Consumer<Component> tooltip2,
+                                        @NotNull TooltipFlag flagIn) {
+                super.appendHoverText(stack, context, display, tooltip2, flagIn);
+                tooltip2.accept(Component.translatable("ars_nouveau.source_jar.fullness", 100));
+            }
+        });
     public static BlockEntityTypeRegistryWrapper<CreativeSourceJarTile> CREATIVE_SOURCE_JAR_TILE = registerTile(LibBlockNames.CREATIVE_SOURCE_JAR, CreativeSourceJarTile::new, CREATIVE_SOURCE_JAR);
     public static BlockRegistryWrapper<StrippableLog> CASCADING_LOG = registerBlockAndItem(LibBlockNames.CASCADING_LOG, () -> new StrippableLog(logProp(), BlockRegistry.STRIPPED_AWLOG_BLUE));
     public static BlockRegistryWrapper<MagicLeaves> CASCADING_LEAVE = registerBlockAndItem(LibBlockNames.CASCADING_LEAVES, () -> createLeavesBlock(MapColor.COLOR_BLUE));

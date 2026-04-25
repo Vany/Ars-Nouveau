@@ -1,18 +1,12 @@
 package com.hollingsworth.arsnouveau.common.block;
 
 import com.hollingsworth.arsnouveau.common.block.tile.SourceJarTile;
-import com.hollingsworth.arsnouveau.common.items.data.BlockFillContents;
 import com.hollingsworth.arsnouveau.common.lib.LibBlockNames;
 import com.hollingsworth.arsnouveau.setup.registry.BlockRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.component.TooltipDisplay;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -37,9 +31,6 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED;
@@ -130,11 +121,6 @@ public class SourceJar extends SourceBlock implements SimpleWaterloggedBlock {
         if (tile == null || tile.getSource() <= 0) return 0;
         int step = (tile.getMaxSource() - 1) / 14;
         return (tile.getSource() - 1) / step + 1;
-    }
-
-    public void appendHoverText(ItemStack stack, @Nullable Item.TooltipContext context, @NotNull TooltipDisplay pTooltipDisplay, @NotNull Consumer<Component> tooltip, TooltipFlag flagIn) {
-        int mana = BlockFillContents.get(stack);
-        tooltip.accept(Component.translatable("ars_nouveau.source_jar.fullness", (mana * 100) / 10000));
     }
 
     @Override

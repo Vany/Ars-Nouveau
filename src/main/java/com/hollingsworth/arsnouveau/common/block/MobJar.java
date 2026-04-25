@@ -159,7 +159,8 @@ public class MobJar extends TickableModBlock implements EntityBlock, SimpleWater
         }
     }
 
-    public void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pBlock, BlockPos pFromPos, boolean pIsMoving) {
+    @Override
+    public void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pBlock, net.minecraft.world.level.redstone.Orientation pFromPos, boolean pIsMoving) {
         if (!pLevel.isClientSide()) {
             boolean flag = pState.getValue(POWERED);
             if (flag != pLevel.hasNeighborSignal(pPos)) {
@@ -220,6 +221,7 @@ public class MobJar extends TickableModBlock implements EntityBlock, SimpleWater
         return new MobJarTile(pPos, pState);
     }
 
+    @Override
     public int getSignal(BlockState pBlockState, BlockGetter pBlockAccess, BlockPos pPos, Direction pSide) {
         if (pBlockAccess.getBlockEntity(pPos) instanceof MobJarTile jarTile) {
             AtomicInteger power = new AtomicInteger();

@@ -58,15 +58,18 @@ public class TemporaryBlock extends MirrorWeave implements EntityBlock, ITickabl
         return RenderShape.MODEL;
     }
 
+    @Override
     public boolean isSignalSource(BlockState state) {
         return state.getValue(POWER) > 0;
     }
 
 
+    @Override
     public int getSignal(BlockState blockState, BlockGetter blockAccess, BlockPos pos, Direction side) {
         return blockState.getValue(POWER);
     }
 
+    @Override
     public int getDirectSignal(BlockState blockState, BlockGetter blockAccess, BlockPos pos, Direction side) {
         return blockState.getValue(POWER);
     }

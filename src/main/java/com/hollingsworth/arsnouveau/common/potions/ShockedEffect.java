@@ -27,6 +27,7 @@ public class ShockedEffect extends MobEffect {
         // 1.21.11: getArmorSlots() removed; iterate armor EquipmentSlots
         for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
             ItemStack i = entity.getItemBySlot(slot);
+            if (i.isEmpty()) continue;
             EnergyHandler energyStorage = Capabilities.Energy.ITEM.getCapability(i, ItemAccess.forStack(i));
             if (energyStorage != null) {
                 multiplier++;
@@ -34,11 +35,11 @@ public class ShockedEffect extends MobEffect {
         }
 
         ItemStack mainHand = entity.getMainHandItem();
-        EnergyHandler energyStorage = Capabilities.Energy.ITEM.getCapability(mainHand, ItemAccess.forStack(mainHand));
+        EnergyHandler energyStorage = !mainHand.isEmpty() ? Capabilities.Energy.ITEM.getCapability(mainHand, ItemAccess.forStack(mainHand)) : null;
         if (energyStorage != null)
             multiplier++;
         ItemStack offHand = entity.getOffhandItem();
-        energyStorage = Capabilities.Energy.ITEM.getCapability(offHand, ItemAccess.forStack(offHand));
+        energyStorage = !offHand.isEmpty() ? Capabilities.Energy.ITEM.getCapability(offHand, ItemAccess.forStack(offHand)) : null;
         if (energyStorage != null)
             multiplier++;
         if (multiplier > 0) {

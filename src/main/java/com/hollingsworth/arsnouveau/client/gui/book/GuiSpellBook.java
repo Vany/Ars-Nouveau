@@ -7,6 +7,7 @@ import com.hollingsworth.arsnouveau.api.documentation.DocClientUtils;
 import com.hollingsworth.arsnouveau.api.registry.FamiliarRegistry;
 import com.hollingsworth.arsnouveau.api.registry.GlyphRegistry;
 import com.hollingsworth.arsnouveau.api.registry.SpellCasterRegistry;
+import com.hollingsworth.arsnouveau.api.perk.PerkAttributes;
 import com.hollingsworth.arsnouveau.api.spell.*;
 import com.hollingsworth.arsnouveau.api.util.ManaUtil;
 import com.hollingsworth.arsnouveau.client.ClientInfo;
@@ -306,7 +307,12 @@ public class GuiSpellBook extends SpellSlottedScreen {
     }
 
     public int getExtraGlyphSlots() {
-        return (ServerConfig.INFINITE_SPELLS.get() ? ServerConfig.INF_SPELLS_LENGHT_MODIFIER.get() : 0) + bonusSlots;
+        int attrBonus = 0;
+        var player = net.minecraft.client.Minecraft.getInstance().player;
+        if (player != null && player.getAttributes().hasAttribute(PerkAttributes.SPELL_LENGTH)) {
+            attrBonus = (int) player.getAttributeValue(PerkAttributes.SPELL_LENGTH);
+        }
+        return (ServerConfig.INFINITE_SPELLS.get() ? ServerConfig.INF_SPELLS_LENGHT_MODIFIER.get() : 0) + bonusSlots + attrBonus;
     }
 
     @Override

@@ -107,7 +107,8 @@ public class BasicSpellTurret extends TickableModBlock implements SimpleWaterlog
         });
     }
 
-    public void neighborChanged(BlockState state, Level worldIn, @NotNull BlockPos pos, @NotNull Block blockIn, @NotNull BlockPos fromPos, boolean isMoving) {
+    @Override
+    public void neighborChanged(BlockState state, Level worldIn, @NotNull BlockPos pos, @NotNull Block blockIn, net.minecraft.world.level.redstone.Orientation fromPos, boolean isMoving) {
         boolean neighborSignal = worldIn.hasNeighborSignal(pos) || worldIn.hasNeighborSignal(pos.above());
         boolean isTriggered = state.getValue(TRIGGERED);
         if (neighborSignal && !isTriggered) {

@@ -23,9 +23,6 @@ public class RenderUtils {
 
     public static void drawItemAsIcon(ItemStack itemStack, GuiGraphics graphics, int positionX, int positionY, int size, boolean renderTransparent) {
         if (itemStack.isEmpty()) return;
-        // MC 1.21.11: graphics.pose() returns Matrix3x2fStack (no Z, no PoseStack).
-        // TODO: 1.21.11 - pose transforms not available (Z-translate and 3D scale removed).
-        // Render item at scaled position by adjusting the destination coordinates directly.
         float scaleFactor = size / 16.0f;
         int renderX = (int) (positionX / scaleFactor);
         int renderY = (int) (positionY / scaleFactor);
@@ -33,6 +30,10 @@ public class RenderUtils {
         ms.pushMatrix();
         ms.scale(scaleFactor, scaleFactor);
         graphics.renderItem(itemStack, renderX, renderY);
+        if (renderTransparent) {
+            // Dim unlearned glyphs: 75% opaque dark overlay ≈ 25% item visibility (matches old alpha behavior)
+            graphics.fill(renderX, renderY, renderX + 16, renderY + 16, 0xC0101010);
+        }
         ms.popMatrix();
     }
 

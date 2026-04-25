@@ -6,12 +6,14 @@ import com.hollingsworth.arsnouveau.common.entity.BubbleEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import org.joml.Matrix4f;
@@ -86,10 +88,13 @@ public class BubbleRenderer extends EntityRenderer<BubbleEntity, EntityRenderSta
             }
         }
         VertexConsumer r = buffer.getBuffer(ShaderRegistry.worldEntityIcon(texture));
-        r.addVertex(pose, -8, -8, 0).setUv(0, 0);
-        r.addVertex(pose, -8, 8, 0).setUv(0, 1);
-        r.addVertex(pose, 8, 8, 0).setUv(1, 1);
-        r.addVertex(pose, 8, -8, 0).setUv(1, 0);
+        int light = LightTexture.FULL_BRIGHT;
+        int overlay = OverlayTexture.NO_OVERLAY;
+        // NEW_ENTITY format: pos, color, uv0, uv1 (overlay), uv2 (lightmap), normal
+        r.addVertex(pose, -8, -8, 0).setColor(255, 255, 255, 255).setUv(0, 0).setOverlay(overlay).setUv2(light & 0xFFFF, (light >> 16) & 0xFFFF).setNormal(0, 0, 1);
+        r.addVertex(pose, -8,  8, 0).setColor(255, 255, 255, 255).setUv(0, 1).setOverlay(overlay).setUv2(light & 0xFFFF, (light >> 16) & 0xFFFF).setNormal(0, 0, 1);
+        r.addVertex(pose,  8,  8, 0).setColor(255, 255, 255, 255).setUv(1, 1).setOverlay(overlay).setUv2(light & 0xFFFF, (light >> 16) & 0xFFFF).setNormal(0, 0, 1);
+        r.addVertex(pose,  8, -8, 0).setColor(255, 255, 255, 255).setUv(1, 0).setOverlay(overlay).setUv2(light & 0xFFFF, (light >> 16) & 0xFFFF).setNormal(0, 0, 1);
 
         matrixStack.popPose();
     }

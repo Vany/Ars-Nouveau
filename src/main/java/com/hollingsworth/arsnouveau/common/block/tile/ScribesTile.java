@@ -31,6 +31,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -82,11 +83,16 @@ public class ScribesTile extends ModdedTile implements GeoBlockEntity, ITickable
             recipe = null; // Used on client to remove recipe since for some forsaken reason world is missing during load.
         }
 
-        if (recipeID != null && !recipeID.toString().isEmpty() && (recipe == null || !recipe.id().identifier().equals(recipeID)) && level instanceof ServerLevel serverLevel) {
+        if (recipeID != null && !recipeID.toString().isEmpty() && (recipe == null || !recipe.id().identifier().equals(recipeID))) {
             ResourceKey<Recipe<?>> key = ResourceKey.create(Registries.RECIPE, recipeID);
-            //noinspection unchecked
-            recipe = (RecipeHolder<GlyphRecipe>) serverLevel.recipeAccess().byKey(key).orElse(null);
-            setChanged();
+            if (level instanceof ServerLevel serverLevel) {
+                //noinspection unchecked
+                recipe = (RecipeHolder<GlyphRecipe>) serverLevel.recipeAccess().byKey(key).orElse(null);
+                setChanged();
+            } else if (level.recipeAccess() instanceof RecipeManager rm) {
+                //noinspection unchecked
+                recipe = (RecipeHolder<GlyphRecipe>) rm.byKey(key).orElse(null);
+            }
         }
         if (!level.isClientSide() && level.getGameTime() % 5 == 0 && recipe != null) {
             boolean foundStack = false;

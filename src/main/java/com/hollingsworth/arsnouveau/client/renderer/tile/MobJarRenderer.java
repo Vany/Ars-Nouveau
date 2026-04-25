@@ -1,7 +1,6 @@
 package com.hollingsworth.arsnouveau.client.renderer.tile;
 
 import com.hollingsworth.arsnouveau.api.registry.JarBehaviorRegistry;
-import com.hollingsworth.arsnouveau.client.ClientInfo;
 import com.hollingsworth.arsnouveau.common.block.MobJar;
 import com.hollingsworth.arsnouveau.common.block.tile.MobJarTile;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -9,34 +8,69 @@ import com.mojang.math.Axis;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LightningBolt;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-// MC 1.21.11: BlockEntityRenderer now requires 2 type params <T, S extends BlockEntityRenderState>
-// render() is replaced by createRenderState() + extractRenderState() + submit()
-// Entity rendering inside block entities now uses entityRenderer.extractEntity() + submit()
-// TODO: Port entity-in-jar rendering properly. The entity data (scale, direction, etc.) must be
-// stored in a custom render state via extractRenderState, then rendered in submit via entityRenderer.submit().
-// For now we use a basic stub that defers to Minecraft's entity renderer via extractEntity + submit.
-public class MobJarRenderer implements BlockEntityRenderer<MobJarTile, BlockEntityRenderState> {
+public class MobJarRenderer implements BlockEntityRenderer<MobJarTile, MobJarRenderState> {
     private final EntityRenderDispatcher entityRenderer;
 
-    public MobJarRenderer(BlockEntityRendererProvider.Context pContext) {
-        // 1.21.11: Context is a record; accessor is entityRenderer() not getEntityRenderer()
-        entityRenderer = pContext.entityRenderer();
+    public MobJarRenderer(BlockEntityRendererProvider.Context context) {
+        this.entityRenderer = context.entityRenderer();
     }
 
     @Override
-    public BlockEntityRenderState createRenderState() {
-        return new BlockEntityRenderState();
+    public MobJarRenderState createRenderState() {
+        return new MobJarRenderState();
+    }
+
+    @Override
+    public void extractRenderState(
+        MobJarTile tile, MobJarRenderState state, float partialTick, Vec3 cameraPos,
+        ModelFeatureRenderer.@Nullable CrumblingOverlay overlay
+    ) {
+        BlockEntityRenderer.super.extractRenderState(tile, state, partialTick, cameraPos, overlay);
+        state.displayEntity = null;
+
+        Entity entity = tile.getEntity();
+        if (entity == null) return;
+
+        // Extract entity render state (equivalent to SpawnerRenderer pattern)
+        state.displayEntity = entityRenderer.extractEntity(entity, partialTick);
+        state.displayEntity.lightCoords = state.lightCoords;
+
+        // Base scale: fit entity inside the jar's ~0.53 block interior
+        float scale = entity instanceof LightningBolt ? 0.0075f : 0.53125f;
+        float maxDim = Math.max(entity.getBbWidth(), entity.getBbHeight());
+        if (maxDim > 1.0f) scale /= maxDim;
+        state.bbHeight = entity.getBbHeight();
+
+        // JarBehavior adjustments (scale multiplier and translation offset)
+        AtomicReference<Vec3> scaleAdj = new AtomicReference<>(Vec3.ZERO);
+        AtomicReference<Vec3> translateAdj = new AtomicReference<>(Vec3.ZERO);
+        JarBehaviorRegistry.forEach(entity, behavior -> {
+            scaleAdj.set(scaleAdj.get().add(behavior.scaleOffset(tile)));
+            translateAdj.set(translateAdj.get().add(behavior.translate(tile)));
+        });
+
+        Vec3 finalScale = new Vec3(scale, scale, scale).multiply(scaleAdj.get().add(1, 1, 1));
+        Vec3 finalTranslate = new Vec3(0.5, 0, 0.5).add(translateAdj.get());
+
+        state.scaleX = (float) finalScale.x;
+        state.scaleY = (float) finalScale.y;
+        state.scaleZ = (float) finalScale.z;
+        state.translateX = (float) finalTranslate.x;
+        state.translateY = (float) finalTranslate.y;
+        state.translateZ = (float) finalTranslate.z;
+        state.facing = tile.getBlockState().getValue(MobJar.FACING);
     }
 
     @Override
@@ -45,73 +79,34 @@ public class MobJarRenderer implements BlockEntityRenderer<MobJarTile, BlockEnti
     }
 
     @Override
-    public void submit(BlockEntityRenderState renderState, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraRenderState) {
-        // TODO: MobJarTile entity rendering is not directly available from BlockEntityRenderState.
-        // Entity-specific data (entity reference, scale overrides, direction) must be captured
-        // during extractRenderState into a custom render state subclass.
-        // The full entity rendering pipeline (extractEntity + submit) should be done here.
-        // Currently stubbed - entities in jars will not render until this is ported.
-    }
+    public void submit(
+        MobJarRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState
+    ) {
+        if (state.displayEntity == null) return;
 
-    // Legacy render path - kept as reference for porting
-    @SuppressWarnings("unused")
-    private void legacyRenderReference(MobJarTile pBlockEntity, float pPartialTick, PoseStack pPoseStack) {
-        Entity entity = pBlockEntity.getEntity();
-        if (entity == null)
-            return;
-        float f = 0.53125F;
-        float f1 = Math.max(entity.getBbWidth(), entity.getBbHeight());
+        poseStack.pushPose();
+        poseStack.translate(state.translateX, state.translateY, state.translateZ);
+        poseStack.scale(state.scaleX, state.scaleY, state.scaleZ);
 
-        if ((double) f1 > 1.0d) {
-            f /= f1 * 1.0;
+        // Rotate entity based on which face the jar is mounted on
+        Direction facing = state.facing;
+        if (facing == Direction.EAST) {
+            poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
+        } else if (facing == Direction.WEST) {
+            poseStack.mulPose(Axis.ZP.rotationDegrees(-90.0F));
+        } else if (facing == Direction.NORTH) {
+            poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
+        } else if (facing == Direction.SOUTH) {
+            poseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
+        } else if (facing == Direction.DOWN) {
+            poseStack.translate(0, state.bbHeight + 0.75f, 0);
         }
-        if (entity instanceof LightningBolt bolt) {
-            if (bolt.level.getGameTime() % 20 == 0)
-                bolt.seed = ClientInfo.ticksInGame;
-            f = 0.0075f;
-        }
-        AtomicReference<Vec3> adjustedScale = new AtomicReference<>(new Vec3(0, 0, 0));
-        AtomicReference<Vec3> adjustedTranslation = new AtomicReference<>(new Vec3(0, 0, 0));
-        AtomicReference<Boolean> shouldParticlaTick = new AtomicReference<>(false);
-        JarBehaviorRegistry.forEach(entity, jarBehavior -> {
-            Vec3 customScale = jarBehavior.scaleOffset(pBlockEntity);
-            adjustedScale.set(adjustedScale.get().add(customScale));
-            adjustedTranslation.set(adjustedTranslation.get().add(jarBehavior.translate(pBlockEntity)));
-            if (jarBehavior.shouldUsePartialTicks(pBlockEntity))
-                shouldParticlaTick.set(true);
-        });
+        poseStack.mulPose(facing.getRotation());
 
-        Vec3 scale = new Vec3(f, f, f).multiply(adjustedScale.get().add(1, 1, 1));
-        Vec3 translate = new Vec3(0.5, 0, 0.5).add(adjustedTranslation.get());
-        pPoseStack.translate(translate.x, translate.y, translate.z);
-        pPoseStack.scale((float) scale.x, (float) scale.y, (float) scale.z);
+        // x/y/z = 0: PoseStack already positions us at block origin via the BER infrastructure.
+        // EntityRenderDispatcher.submit will add getRenderOffset on top, which is correct.
+        entityRenderer.submit(state.displayEntity, cameraState, 0.0, 0.0, 0.0, poseStack, collector);
 
-        Direction direction = pBlockEntity.getBlockState().getValue(MobJar.FACING);
-        if (direction == Direction.EAST) {
-            pPoseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
-        } else if (direction == Direction.WEST) {
-            pPoseStack.mulPose(Axis.ZP.rotationDegrees(-90.0F));
-        } else if (direction == Direction.NORTH) {
-            pPoseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
-        } else if (direction == Direction.SOUTH) {
-            pPoseStack.mulPose(Axis.XP.rotationDegrees(-90.0F));
-        } else if (direction == Direction.DOWN) {
-            pPoseStack.translate(0, entity.getBbHeight() + 0.75, 0);
-        }
-        pPoseStack.mulPose(pBlockEntity.getBlockState().getValue(MobJar.FACING).getRotation());
-        entity.setDeltaMovement(0, 0, 0);
-        if (shouldParticlaTick.get()) {
-            entity.xo = entity.getX();
-            entity.yo = entity.getY();
-            entity.zo = entity.getZ();
-            entity.xRotO = entity.xRot;
-            entity.yRotO = entity.yRot;
-            if (entity instanceof LivingEntity livingEntity) {
-                livingEntity.yBodyRotO = livingEntity.yBodyRot;
-                livingEntity.yHeadRotO = livingEntity.yHeadRot;
-            }
-        }
-        // Old: this.entityRenderer.render(entity, 0, 0, 0, 0, pPartialTick, pPoseStack, pBufferSource, pPackedLight);
-        // New: entityRenderer.submit(entityRenderState, cameraState, 0, 0, 0, pPoseStack, collector);
+        poseStack.popPose();
     }
 }

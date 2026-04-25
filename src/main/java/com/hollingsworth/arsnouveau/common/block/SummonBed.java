@@ -32,7 +32,8 @@ public class SummonBed extends ModBlock {
         return state.getValue(POWERED);
     }
 
-    public void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pBlock, BlockPos pFromPos, boolean pIsMoving) {
+    @Override
+    public void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pBlock, net.minecraft.world.level.redstone.Orientation pFromPos, boolean pIsMoving) {
         boolean flag = pLevel.hasNeighborSignal(pPos);
         if (flag != pState.getValue(POWERED)) {
             pLevel.setBlock(pPos, pState.setValue(POWERED, flag), 2);

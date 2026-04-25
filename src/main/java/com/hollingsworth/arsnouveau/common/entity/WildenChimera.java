@@ -571,6 +571,7 @@ public class WildenChimera extends Monster implements GeoEntity {
         return false;
     }
 
+    @Override
     public boolean canBeAffected(MobEffectInstance instance) {
         MobEffect effect = instance.getEffect().value();
         if (instance.getEffect() instanceof SnareEffect)

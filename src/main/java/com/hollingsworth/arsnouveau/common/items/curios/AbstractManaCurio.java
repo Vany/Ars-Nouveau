@@ -1,14 +1,12 @@
 package com.hollingsworth.arsnouveau.common.items.curios;
 
-import com.google.common.collect.Multimap;
 import com.hollingsworth.arsnouveau.api.item.ArsNouveauCurio;
 import com.hollingsworth.arsnouveau.api.perk.PerkAttributes;
-import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
-import top.theillusivec4.curios.api.SlotContext;
+import top.theillusivec4.curios.api.CurioAttributeModifiers;
 
 public abstract class AbstractManaCurio extends ArsNouveauCurio {
     public AbstractManaCurio() {
@@ -23,11 +21,25 @@ public abstract class AbstractManaCurio extends ArsNouveauCurio {
         return 0;
     }
 
+    // Curios 14: attribute modifiers are read via getDefaultCurioAttributeModifiers, not the old
+    // getAttributeModifiers(SlotContext, Identifier, ItemStack) which is no longer called by the tick loop.
+    // Modifier IDs are derived from the item's registry path to avoid conflicts when multiple curios
+    // with the same attribute are equipped simultaneously.
     @Override
-    public Multimap<Holder<Attribute>, AttributeModifier> getAttributeModifiers(SlotContext slotContext, Identifier id, ItemStack stack) {
-        Multimap<Holder<Attribute>, AttributeModifier> attributes = super.getAttributeModifiers(slotContext, id, stack);
-        attributes.put(PerkAttributes.MAX_MANA, new AttributeModifier(id, this.getMaxManaBoost(stack), AttributeModifier.Operation.ADD_VALUE));
-        attributes.put(PerkAttributes.MANA_REGEN_BONUS, new AttributeModifier(id, this.getManaRegenBonus(stack), AttributeModifier.Operation.ADD_VALUE));
-        return attributes;
+    public CurioAttributeModifiers getDefaultCurioAttributeModifiers(ItemStack stack) {
+        Identifier key = BuiltInRegistries.ITEM.getKey(this);
+        String path = key != null ? key.getPath() : getClass().getSimpleName().toLowerCase();
+        var builder = CurioAttributeModifiers.builder();
+        int maxMana = getMaxManaBoost(stack);
+        if (maxMana != 0)
+            builder.addModifier(PerkAttributes.MAX_MANA,
+                new AttributeModifier(Identifier.fromNamespaceAndPath("ars_nouveau", path + "_max_mana"),
+                    maxMana, AttributeModifier.Operation.ADD_VALUE));
+        int manaRegen = getManaRegenBonus(stack);
+        if (manaRegen != 0)
+            builder.addModifier(PerkAttributes.MANA_REGEN_BONUS,
+                new AttributeModifier(Identifier.fromNamespaceAndPath("ars_nouveau", path + "_mana_regen"),
+                    manaRegen, AttributeModifier.Operation.ADD_VALUE));
+        return builder.build();
     }
 }

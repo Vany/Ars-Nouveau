@@ -2,6 +2,8 @@ package com.hollingsworth.arsnouveau.common.block.tile;
 
 import com.hollingsworth.arsnouveau.ArsNouveau;
 import com.hollingsworth.arsnouveau.api.spell.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import com.hollingsworth.arsnouveau.client.renderer.PlanariumRenderingWorld;
 import com.hollingsworth.arsnouveau.client.renderer.world.CulledStatePos;
 import com.hollingsworth.arsnouveau.common.block.ITickable;
@@ -55,6 +57,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PlanariumTile extends ModdedTile implements ITickable, Nameable {
+    private static final Logger LOGGER = LogManager.getLogger(PlanariumTile.class);
 
     public static DimManager dimManager = new DimManager();
     public static Map<ResourceKey<Level>, ClientDimEntry> clientTemplates = new ConcurrentHashMap<>();
@@ -86,6 +89,13 @@ public class PlanariumTile extends ModdedTile implements ITickable, Nameable {
                     if (BlockPosHelpers.distanceBetween(worldPosition, serverPlayer.blockPosition()) < 64) {
                         playersNearby = true;
                         break;
+                    }
+                }
+                // Also active when players are inside the associated dimension
+                if (!playersNearby) {
+                    ServerLevel dimLevel = serverLevel.getServer().getLevel(key);
+                    if (dimLevel != null && !dimLevel.players().isEmpty()) {
+                        playersNearby = true;
                     }
                 }
             }
@@ -229,12 +239,14 @@ public class PlanariumTile extends ModdedTile implements ITickable, Nameable {
         if (key != null && level instanceof ServerLevel serverLevel) {
             ServerLevel dimLevel = level.getServer().getLevel(key);
             if (dimLevel == null) {
+                LOGGER.error("[PlanariumTile] sendEntityTo: dimLevel is null for key={} — dimension not registered yet", key);
                 return;
             }
             // Ensure we are not already in another jar dimension, preventing players from getting trapped between two jars
             DimMappingData dimMappingData = DimMappingData.from(serverLevel);
             JarDimData jarData = JarDimData.from(dimLevel);
-            if (entity instanceof ServerPlayer && dimMappingData.getByKey(level.dimension().identifier()) == null) {
+            boolean alreadyInJarDim = dimMappingData.getByKey(level.dimension().identifier()) != null;
+            if (entity instanceof ServerPlayer && !alreadyInJarDim) {
                 jarData.setEnteredFrom(entity.getUUID(), GlobalPos.of(level.dimension(), entity.blockPosition()), entity.getRotationVector());
             }
             BlockPos spawnPos = jarData.getSpawnPos();
@@ -316,7 +328,6 @@ public class PlanariumTile extends ModdedTile implements ITickable, Nameable {
                 return createDimension(serverLevel.getServer());
             });
             var entry = getOrCreateTemplate(serverLevel, ownerPos, key);
-
             return new Tuple<>(newLevel, entry);
         }
 

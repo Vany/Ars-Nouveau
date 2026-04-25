@@ -33,7 +33,7 @@ public class AbjurationEssence extends AbstractEssence {
             if (scribesTile.getStack().has(DataComponentRegistry.PRESTIDIGITATION)) {
                 scribesTile.getStack().remove(DataComponentRegistry.PRESTIDIGITATION.get());
                 scribesTile.setChanged();
-                context.getPlayer().displayClientMessage(Component.translatable("ars_nouveau.prestidigitation_clear"), false);
+                context.getPlayer().displayClientMessage(Component.translatable("ars_nouveau.prestidigitation.prestidigitation_clear"), false);
             }
         }
         return super.useOn(context);

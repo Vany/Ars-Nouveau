@@ -44,6 +44,8 @@ public class StarbuncleRenderer extends GeoEntityRenderer<Starbuncle, ArsEntityR
     @Override
     public void addRenderData(Starbuncle animatable, @Nullable Void relatedObject, ArsEntityRenderState renderState, float partialTick) {
         renderState.addGeckolibData(ANDataTickets.ENTITY_NAME, animatable.getName().getString());
+        renderState.addGeckolibData(ANDataTickets.STARBUNCLE_TEXTURE, animatable.getTexture());
+        renderState.addGeckolibData(ANDataTickets.STARBUNCLE_MODEL, animatable.getModel());
     }
 
     // GeckoLib 5: getRenderType(R renderState, Identifier texture) - new signature

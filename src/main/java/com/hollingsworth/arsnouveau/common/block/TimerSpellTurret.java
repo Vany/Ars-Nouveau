@@ -54,7 +54,7 @@ public class TimerSpellTurret extends BasicSpellTurret {
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level world, @NotNull BlockPos pos, @NotNull Block blockIn, @NotNull BlockPos fromPos, boolean isMoving) {
+    public void neighborChanged(BlockState state, Level world, @NotNull BlockPos pos, @NotNull Block blockIn, net.minecraft.world.level.redstone.Orientation fromPos, boolean isMoving) {
         if (!world.isClientSide() && world.getBlockEntity(pos) instanceof TimerSpellTurretTile tile) {
             tile.isOff = world.hasNeighborSignal(pos);
             tile.updateBlock();

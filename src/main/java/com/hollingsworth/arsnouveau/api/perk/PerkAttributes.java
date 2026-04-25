@@ -35,6 +35,9 @@ public class PerkAttributes {
 
     public static final DeferredHolder<Attribute, Attribute> WEIGHT = registerAttribute("ars_nouveau.perk.weight", (id) -> new RangedAttribute(id, 1.0D, 0.0D, 100.0D).setSyncable(true), "24d1ae35-a7c7-4c85-9b56-c94de36faf91");
 
+    // Number of additional glyph slots added to the spellbook for this player. Default 0, integer in practice.
+    public static final DeferredHolder<Attribute, Attribute> SPELL_LENGTH = registerAttribute("ars_nouveau.perk.spell_length", (id) -> new RangedAttribute(id, 0.0D, 0.0D, 1000.0D).setSyncable(true), "a1b2c3d4-e5f6-7890-abcd-ef1234567890");
+
     public static DeferredHolder<Attribute, Attribute> registerAttribute(String name, Function<String, Attribute> attribute, String uuid) {
         return registerAttribute(name, attribute, UUID.fromString(uuid));
     }

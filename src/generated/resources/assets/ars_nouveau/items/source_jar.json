@@ -1,6 +1,90 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "ars_nouveau:item/source_jar"
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "ars_nouveau:block/source_jar/source_jar0"
+    },
+    "entries": [
+      {
+        "threshold": 0.001,
+        "model": {
+          "type": "minecraft:model",
+          "model": "ars_nouveau:block/source_jar/source_jar_sliver"
+        }
+      },
+      {
+        "threshold": 0.10,
+        "model": {
+          "type": "minecraft:model",
+          "model": "ars_nouveau:block/source_jar/source_jar10"
+        }
+      },
+      {
+        "threshold": 0.20,
+        "model": {
+          "type": "minecraft:model",
+          "model": "ars_nouveau:block/source_jar/source_jar20"
+        }
+      },
+      {
+        "threshold": 0.30,
+        "model": {
+          "type": "minecraft:model",
+          "model": "ars_nouveau:block/source_jar/source_jar30"
+        }
+      },
+      {
+        "threshold": 0.40,
+        "model": {
+          "type": "minecraft:model",
+          "model": "ars_nouveau:block/source_jar/source_jar40"
+        }
+      },
+      {
+        "threshold": 0.50,
+        "model": {
+          "type": "minecraft:model",
+          "model": "ars_nouveau:block/source_jar/source_jar50"
+        }
+      },
+      {
+        "threshold": 0.60,
+        "model": {
+          "type": "minecraft:model",
+          "model": "ars_nouveau:block/source_jar/source_jar60"
+        }
+      },
+      {
+        "threshold": 0.70,
+        "model": {
+          "type": "minecraft:model",
+          "model": "ars_nouveau:block/source_jar/source_jar70"
+        }
+      },
+      {
+        "threshold": 0.80,
+        "model": {
+          "type": "minecraft:model",
+          "model": "ars_nouveau:block/source_jar/source_jar80"
+        }
+      },
+      {
+        "threshold": 0.90,
+        "model": {
+          "type": "minecraft:model",
+          "model": "ars_nouveau:block/source_jar/source_jar90"
+        }
+      },
+      {
+        "threshold": 1.00,
+        "model": {
+          "type": "minecraft:model",
+          "model": "ars_nouveau:block/source_jar/source_jar100"
+        }
+      }
+    ]
   }
 }

@@ -32,6 +32,7 @@ public class RedstoneRelay extends TickableModBlock implements EntityBlock {
     }
 
 
+    @Override
     public int getSignal(BlockState pBlockState, BlockGetter pBlockAccess, BlockPos pPos, Direction pSide) {
         Direction facing = pBlockState.getValue(FACING);
         if (pSide == facing.getOpposite() || !(pBlockAccess.getBlockEntity(pPos) instanceof RedstoneRelayTile redstoneRelayTile))

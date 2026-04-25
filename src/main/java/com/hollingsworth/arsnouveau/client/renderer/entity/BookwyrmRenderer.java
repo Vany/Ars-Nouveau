@@ -1,15 +1,12 @@
 package com.hollingsworth.arsnouveau.client.renderer.entity;
 
+import com.hollingsworth.arsnouveau.client.renderer.ANDataTickets;
 import com.hollingsworth.arsnouveau.common.entity.EntityBookwyrm;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import org.jspecify.annotations.Nullable;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
-// GeckoLib 5.4.2 migration:
-// - GeoEntityRenderer requires R extends EntityRenderState & GeoRenderState
-// - LivingEntityRenderState does NOT extend GeoRenderState, so we use ArsEntityRenderState
-// - renderRecursively() REMOVED - "item" bone rendering needs to be ported
-// - getTextureLocation(T) removed; texture comes from model's getTextureResource(GeoRenderState)
-// TODO: Port bookwyrm texture (dynamic per-entity) to DataTicket in captureDefaultRenderState
+// GeckoLib 5: color injected via ANDataTickets.BOOKWYRM_COLOR
 // TODO: Port 0.6f scale from old render() override to scaleModelForRender(RenderPassInfo, float, float)
 public class BookwyrmRenderer extends GeoEntityRenderer<EntityBookwyrm, ArsEntityRenderState> {
 
@@ -17,10 +14,15 @@ public class BookwyrmRenderer extends GeoEntityRenderer<EntityBookwyrm, ArsEntit
         super(manager, new BookwyrmModel<>());
     }
 
-    // GeckoLib 5: createRenderState(T, Void) is the correct override (no-arg is final)
     @Override
     public ArsEntityRenderState createRenderState(EntityBookwyrm animatable, Void context) {
         return new ArsEntityRenderState();
+    }
+
+    @Override
+    public void addRenderData(EntityBookwyrm animatable, @Nullable Void relatedObject, ArsEntityRenderState renderState, float partialTick) {
+        super.addRenderData(animatable, relatedObject, renderState, partialTick);
+        renderState.addGeckolibData(ANDataTickets.BOOKWYRM_COLOR, animatable.getColor());
     }
 
     // TODO: Port 0.6f scale from old render() override to scaleModelForRender(RenderPassInfo, float, float)

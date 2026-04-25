@@ -119,12 +119,6 @@ public class ClientHandler {
                 return new ArsEntityRenderState();
             }
         });
-        event.registerEntityRenderer(ModEntities.ENTITY_WIXIE_TYPE.get(), (t) -> new GeoEntityRenderer<EntityWixie, ArsEntityRenderState>(t, new WixieModel<>()) {
-            @Override
-            public ArsEntityRenderState createRenderState(EntityWixie animatable, Void context) {
-                return new ArsEntityRenderState();
-            }
-        });
         event.registerEntityRenderer(ModEntities.WILDEN_STALKER.get(), (t) -> new GeoEntityRenderer<WildenStalker, ArsEntityRenderState>(t, new WildenStalkerModel()));
         event.registerEntityRenderer(ModEntities.WILDEN_GUARDIAN.get(), (t) -> new GeoEntityRenderer<WildenGuardian, ArsEntityRenderState>(t, new WildenGuardianModel()));
         event.registerEntityRenderer(ModEntities.WILDEN_HUNTER.get(), (t) -> new GeoEntityRenderer<WildenHunter, ArsEntityRenderState>(t, new WildenHunterModel()));
@@ -141,6 +135,12 @@ public class ClientHandler {
             @Override
             public ArsEntityRenderState createRenderState(EntityWixie animatable, Void context) {
                 return new ArsEntityRenderState();
+            }
+
+            @Override
+            public void addRenderData(EntityWixie entity, Void context, ArsEntityRenderState state, float partialTick) {
+                super.addRenderData(entity, context, state, partialTick);
+                state.addGeckolibData(com.hollingsworth.arsnouveau.client.renderer.ANDataTickets.WIXIE_COLOR, entity.getColor());
             }
         });
         event.registerEntityRenderer(ModEntities.ENTITY_DUMMY.get(), DummyRenderer::new);
@@ -162,10 +162,29 @@ public class ClientHandler {
         // TODO: special shader render types (rainbow/blame) for named starbuncles need GeckoLib 5.4.2 migration
         // getRenderType now takes (GeoRenderState/LivingEntityRenderState, Identifier) — entity name
         // available via renderState.nameTag; shader stubs use entityCutoutNoCull anyway
-        event.registerEntityRenderer(ModEntities.ENTITY_FAMILIAR_STARBUNCLE.get(), (t) -> new GenericFamiliarRenderer<>(t, new FamiliarStarbyModel<>()));
-        event.registerEntityRenderer(ModEntities.ENTITY_FAMILIAR_DRYGMY.get(), (t) -> new GenericFamiliarRenderer<>(t, new DrygmyModel<>()));
+        event.registerEntityRenderer(ModEntities.ENTITY_FAMILIAR_STARBUNCLE.get(), (t) -> new GenericFamiliarRenderer<com.hollingsworth.arsnouveau.common.entity.familiar.FamiliarStarbuncle>(t, new FamiliarStarbyModel<>()) {
+            @Override
+            public void addRenderData(com.hollingsworth.arsnouveau.common.entity.familiar.FamiliarStarbuncle entity, Void context, ArsEntityRenderState state, float partialTick) {
+                super.addRenderData(entity, context, state, partialTick);
+                state.addGeckolibData(com.hollingsworth.arsnouveau.client.renderer.ANDataTickets.STARBUNCLE_TEXTURE, entity.getTexture());
+                state.addGeckolibData(com.hollingsworth.arsnouveau.client.renderer.ANDataTickets.STARBUNCLE_MODEL, entity.getModel());
+            }
+        });
+        event.registerEntityRenderer(ModEntities.ENTITY_FAMILIAR_DRYGMY.get(), (t) -> new GenericFamiliarRenderer<com.hollingsworth.arsnouveau.common.entity.familiar.FamiliarDrygmy>(t, new DrygmyModel<>()) {
+            @Override
+            public void addRenderData(com.hollingsworth.arsnouveau.common.entity.familiar.FamiliarDrygmy entity, Void context, ArsEntityRenderState state, float partialTick) {
+                super.addRenderData(entity, context, state, partialTick);
+                state.addGeckolibData(com.hollingsworth.arsnouveau.client.renderer.ANDataTickets.DRYGMY_COLOR, entity.getColor());
+            }
+        });
         event.registerEntityRenderer(ModEntities.ENTITY_FAMILIAR_SYLPH.get(), FamiliarWhirlisprigRenderer::new);
-        event.registerEntityRenderer(ModEntities.ENTITY_FAMILIAR_WIXIE.get(), (t) -> new GenericFamiliarRenderer<>(t, new WixieModel<>()));
+        event.registerEntityRenderer(ModEntities.ENTITY_FAMILIAR_WIXIE.get(), (t) -> new GenericFamiliarRenderer<com.hollingsworth.arsnouveau.common.entity.familiar.FamiliarWixie>(t, new WixieModel<>()) {
+            @Override
+            public void addRenderData(com.hollingsworth.arsnouveau.common.entity.familiar.FamiliarWixie entity, Void context, ArsEntityRenderState state, float partialTick) {
+                super.addRenderData(entity, context, state, partialTick);
+                state.addGeckolibData(com.hollingsworth.arsnouveau.client.renderer.ANDataTickets.WIXIE_COLOR, entity.getColor());
+            }
+        });
         event.registerEntityRenderer(ModEntities.ENTITY_BOOKWYRM_TYPE.get(), BookwyrmRenderer::new);
         event.registerEntityRenderer(ModEntities.FAMILIAR_AMETHYST_GOLEM.get(), AmethystGolemRenderer::new);
         event.registerEntityRenderer(ModEntities.ENTITY_FAMILIAR_BOOKWYRM.get(), FamiliarBookwyrmRenderer::new);

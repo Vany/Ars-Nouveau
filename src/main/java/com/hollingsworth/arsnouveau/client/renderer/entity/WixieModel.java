@@ -7,12 +7,8 @@ import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.renderer.base.GeoRenderState;
 
-// GeckoLib 5: getModelResource/getTextureResource now take GeoRenderState
-// setCustomAnimations, getAnimationProcessor().getBone(), GeoBone.setRotX/Y/Z removed
-// TODO: Port head rotation (headPitch, netHeadYaw) and hat bone visibility to captureDefaultRenderState
+// GeckoLib 5: getTextureResource reads WIXIE_COLOR from render state (set by renderer in addRenderData)
 public class WixieModel<T extends LivingEntity & GeoAnimatable> extends GeoModel<T> {
-
-    private static final Identifier WILD_TEXTURE = ArsNouveau.prefix("textures/entity/wixie.png");
 
     @Override
     public Identifier getModelResource(GeoRenderState renderState) {
@@ -21,7 +17,9 @@ public class WixieModel<T extends LivingEntity & GeoAnimatable> extends GeoModel
 
     @Override
     public Identifier getTextureResource(GeoRenderState renderState) {
-        return WILD_TEXTURE;
+        String color = renderState.getGeckolibData(com.hollingsworth.arsnouveau.client.renderer.ANDataTickets.WIXIE_COLOR);
+        if (color == null || color.isEmpty()) color = "blue";
+        return ArsNouveau.prefix("textures/entity/wixie_" + color + ".png");
     }
 
     @Override

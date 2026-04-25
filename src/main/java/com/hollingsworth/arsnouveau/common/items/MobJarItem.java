@@ -6,10 +6,13 @@ import com.hollingsworth.arsnouveau.common.block.tile.MobJarTile;
 import com.hollingsworth.arsnouveau.common.lib.EntityTags;
 import com.hollingsworth.arsnouveau.setup.registry.DataComponentRegistry;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -55,6 +58,27 @@ public class MobJarItem extends BlockItem implements GeoItem {
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return factory;
+    }
+
+    @Override
+    public Component getName(ItemStack stack) {
+        var jarData = stack.get(DataComponentRegistry.MOB_JAR);
+        if (jarData != null) {
+            CompoundTag tag = jarData.entityTag().orElse(new CompoundTag());
+            if (!tag.isEmpty()) {
+                String id = tag.getString("id").orElse("");
+                if (!id.isEmpty()) {
+                    Identifier entityId = Identifier.tryParse(id);
+                    if (entityId != null) {
+                        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(entityId);
+                        if (type != null) {
+                            return Component.translatable("block.ars_nouveau.mob_jar.filled", type.getDescription());
+                        }
+                    }
+                }
+            }
+        }
+        return super.getName(stack);
     }
 
     @Override

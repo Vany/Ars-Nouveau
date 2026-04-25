@@ -9,6 +9,10 @@ import com.hollingsworth.arsnouveau.setup.registry.DataComponentRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentGetter;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomModelData;
+
+import java.util.List;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -204,9 +208,14 @@ public abstract class AbstractSourceMachine extends ModdedTile implements ISourc
     protected void collectImplicitComponents(DataComponentMap.@NotNull Builder pComponents) {
         super.collectImplicitComponents(pComponents);
         int source = this.getSourceStorage().getSource();
+        int maxSource = this.getMaxSource();
         if (source != 0) {
             pComponents.set(DataComponentRegistry.BLOCK_FILL_CONTENTS, new BlockFillContents(source));
         }
+        // Store normalized fill (0.0–1.0) as custom_model_data float[0] for range_dispatch model selection.
+        // Always set so 0% also selects the correct (empty) model without falling back to default.
+        float normalized = maxSource > 0 ? (float) source / maxSource : 0f;
+        pComponents.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of(normalized), List.of(), List.of(), List.of()));
     }
 }
 

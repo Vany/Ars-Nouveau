@@ -68,6 +68,7 @@ public class ItemDetector extends TickableModBlock {
         }
     }
 
+    @Override
     public int getSignal(BlockState pBlockState, BlockGetter pBlockAccess, BlockPos pPos, Direction pSide) {
         if (pBlockAccess.getBlockEntity(pPos) instanceof ItemDetectorTile detectorTile) {
             return detectorTile.getPoweredState() ? 15 : 0;

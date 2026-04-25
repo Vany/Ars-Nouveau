@@ -151,17 +151,18 @@ public class LightningEntity extends LightningBolt {
         if (entity instanceof LivingEntity livingEntity) {
             for (net.minecraft.world.entity.EquipmentSlot _slot : new net.minecraft.world.entity.EquipmentSlot[]{net.minecraft.world.entity.EquipmentSlot.HEAD, net.minecraft.world.entity.EquipmentSlot.CHEST, net.minecraft.world.entity.EquipmentSlot.LEGS, net.minecraft.world.entity.EquipmentSlot.FEET}) {
                 ItemStack i = livingEntity.getItemBySlot(_slot);
+                if (i.isEmpty()) continue;
                 EnergyHandler energyStorage = Capabilities.Energy.ITEM.getCapability(i, ItemAccess.forStack(i));
                 if (energyStorage != null) {
                     multiplier++;
                 }
             }
             ItemStack mainHand = ((LivingEntity) entity).getMainHandItem();
-            EnergyHandler energyStorage = Capabilities.Energy.ITEM.getCapability(mainHand, ItemAccess.forStack(mainHand));
+            EnergyHandler energyStorage = !mainHand.isEmpty() ? Capabilities.Energy.ITEM.getCapability(mainHand, ItemAccess.forStack(mainHand)) : null;
             if (energyStorage != null)
                 multiplier++;
             ItemStack offHand = ((LivingEntity) entity).getOffhandItem();
-            energyStorage = Capabilities.Energy.ITEM.getCapability(offHand, ItemAccess.forStack(offHand));
+            energyStorage = !offHand.isEmpty() ? Capabilities.Energy.ITEM.getCapability(offHand, ItemAccess.forStack(offHand)) : null;
             if (energyStorage != null)
                 multiplier++;
         }

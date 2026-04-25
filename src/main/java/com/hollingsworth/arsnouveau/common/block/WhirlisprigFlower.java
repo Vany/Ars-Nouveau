@@ -88,7 +88,7 @@ public class WhirlisprigFlower extends SummonBlock implements SimpleWaterloggedB
 
     @Override
     public RenderShape getRenderShape(BlockState p_149645_1_) {
-        return RenderShape.MODEL;
+        return RenderShape.INVISIBLE;
     }
 
     @Override

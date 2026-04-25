@@ -161,7 +161,7 @@ public class GuiRadialMenu<T> extends Screen {
         if (hasMouseOver && mousedOverSlot != -1) {
             int adjusted = ((mousedOverSlot + (numberOfSlices / 2 + 1)) % numberOfSlices) - 1;
             adjusted = adjusted == -1 ? numberOfSlices - 1 : adjusted;
-            graphics.drawCenteredString(font, radialMenuSlots.get(adjusted).slotName(), width / 2, (height - font.lineHeight) / 2, 16777215);
+            graphics.drawCenteredString(font, radialMenuSlots.get(adjusted).slotName(), width / 2, (height - font.lineHeight) / 2, 0xFFFFFFFF);
         }
 
         ms.popMatrix();

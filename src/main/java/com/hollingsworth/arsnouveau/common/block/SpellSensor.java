@@ -40,6 +40,7 @@ public class SpellSensor extends TickableModBlock {
         pBuilder.add(PHASE);
     }
 
+    @Override
     public int getSignal(BlockState pBlockState, BlockGetter pBlockAccess, BlockPos pPos, Direction pSide) {
         if (pBlockAccess.getBlockEntity(pPos) instanceof SpellSensorTile sensorTile && sensorTile.outputDuration > 0) {
             return sensorTile.outputStrength;

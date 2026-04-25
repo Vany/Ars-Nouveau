@@ -1,7 +1,26 @@
 # TODO: Ars Nouveau 1.21.1 → 1.21.11 Migration
 
+
+## bugs
+
+- table rendering it rnders out of the hit box
+- all mana jars in inventory rendered empty even if not.
+- mana jar have no correct tooltip, we need to distinguish full and empty.
+- most of the strings have no visible english translation
+- table  show flying items, but not orbit required ones
+
 Work through tasks in order — each group should compile cleanly before moving on.
 See `MEMO.md` for API change details. See `research/` for verified sources.
+
+BUGS:
+
+FIXED:
+- whirlisprig purple-black texture — WhirlisprigModel returned nonexistent `whirlisprig.png`; fallback to `whirlisprig_summer.png` (Serene Seasons unavailable in 1.21.11)
+- WhirlisprigFlower.getRenderShape() returned MODEL instead of INVISIBLE (inconsistent with all other GeckoLib blocks)
+- scribes table rendered twice — submit() guard skips non-HEAD parts (FOOT+OTHER each have own tile entity)
+- alteration table rendered 3× — same fix (3-part block: FOOT+HEAD+OTHER)
+- imbuement chamber doesn't render content — ported to ItemClusterRenderState + extractRenderState pattern
+- scribes table item/ingredient rendering — ported pressed-item + orbiting ingredients to same pattern
 
 ---
 

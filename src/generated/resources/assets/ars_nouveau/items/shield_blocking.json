@@ -1,9 +1,0 @@
-{
-  "model": {
-    "type": "minecraft:special",
-    "base": "ars_nouveau:item/shield_blocking",
-    "model": {
-      "type": "geckolib:geckolib"
-    }
-  }
-}
